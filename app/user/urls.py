@@ -9,6 +9,7 @@ from . import views
 app_name = 'user'
 
 urlpatterns = [
+    # Token Authentication
     path('create/', views.CreateUserView.as_view(), name='create'),
     path('token/', views.CreateTokenView.as_view(), name='token'),
     path('me/', views.ManageUsersView.as_view(), name='me'),

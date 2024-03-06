@@ -7,18 +7,33 @@ from django.contrib.auth import (
 )
 from django.utils.translation import gettext as _
 from rest_framework import serializers
+from django.contrib.auth.password_validation import validate_password
+from django.core import exceptions
 
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for the user object."""
+    password2 = serializers.CharField(max_length=255, write_only=True)
     
     class Meta:
         model = get_user_model()
-        fields = ['email', 'password', 'name']
-        extra_kwargs = {'password': {'write_only': True, 'min_length': 5}}
+        fields = ['email', 'password', 'password2', 'name']
+        # extra_kwargs = {'password': {'write_only': True, 'min_length': 5}}
         
+    def validate(self, attrs):
+        if attrs.get('password') != attrs.get('password2'):
+            raise serializers.ValidationError({'detail': 'passwords does not match!'})
+        
+        try:
+            validate_password(attrs.get('password'))
+        except exceptions.ValidationError as e:
+            raise serializers.ValidationError({'password': list(e.messages)})
+            
+        return super().validate(attrs)
+    
     def create(self, validated_data):
        """Create and return a user with encrypted password."""
+       validated_data.pop('password2', None)
        return get_user_model().objects.create_user(**validated_data)
    
     def update(self, instance, validated_data):

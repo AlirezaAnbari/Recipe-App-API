@@ -4,7 +4,8 @@ Views for the user API
 from rest_framework import generics, authentication, permissions
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.settings import api_settings
-
+from rest_framework.response import Response
+from rest_framework import status
 
 from user.serializers import (
     UserSerializer,
@@ -15,6 +16,13 @@ from user.serializers import (
 class CreateUserView(generics.CreateAPIView):
     """Create a new user in the system."""
     serializer_class = UserSerializer
+    
+    def post(self, request, *args, **kwargs):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     
 class CreateTokenView(ObtainAuthToken): 
