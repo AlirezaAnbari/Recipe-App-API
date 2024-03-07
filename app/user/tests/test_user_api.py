@@ -29,6 +29,7 @@ class PublicUserApiTest(TestCase):
         payload = {
             'email': 'test@example.com',
             'password': 'testpass123',
+            'password2': 'testpass123',
             'name': 'test name',
         }
         res = self.client.post(CREATE_USER_URL, payload)
@@ -125,18 +126,15 @@ class PrivateUserApiTest(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
         
-    def test_retrieve_profile_seccess(self):
+    def test_retrieve_profile_success(self):
         """Test retrieving profile for logged in user."""
         res = self.client.get(ME_URL)
-        
+
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            res.data,
-            {
-                'name': self.user.name,
-                'email': self.user.email,
-            }
-        )
+        self.assertEqual(res.data, {
+            'name': self.user.name,
+            'email': self.user.email,
+        })
         
     def test_post_me_not_allowed(self):
         """Test POST not allowed for the me endpoint."""
